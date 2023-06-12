@@ -1,0 +1,6 @@
+name = "opbot"
+main = "src/interactions.ts"
+compatibility_date = "2023-06-12"
+kv_namespaces = [
+    { binding = "ROLES", id = "e0c1910845c142019ecf38c87041c001" }
+]
