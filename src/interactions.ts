@@ -134,15 +134,10 @@ async function deopCommand(
     return "No operator role is set, please run /setup";
   }
   if (interaction.member) {
-    if (
-      !(await delRole(
-        token,
-        interaction.guild_id,
-        interaction.member.user.id,
-        role
-      ))
-    ) {
-      return "Failed to delete role";
+    try {
+      delRole(token, interaction.guild_id, interaction.member.user.id, role);
+    } catch (err) {
+      return "Failed to remove role: " + err;
     }
     return "Successfully removed role";
   } else {
@@ -166,15 +161,10 @@ async function reopCommand(
     return "No operator role is set, please run /setup";
   }
   if (interaction.member) {
-    if (
-      !(await addRole(
-        token,
-        interaction.guild_id,
-        interaction.member.user.id,
-        role
-      ))
-    ) {
-      return "Failed to add role";
+    try {
+      addRole(token, interaction.guild_id, interaction.member.user.id, role);
+    } catch (err) {
+      return "Failed to add role: " + err;
     }
     return "Successfully added role";
   } else {
@@ -194,15 +184,8 @@ async function addRole(
   guild: Snowflake,
   user: Snowflake,
   role: Snowflake
-): Promise<boolean> {
-  const resp = await fetch(
-    `https://discord.com/api/v10/guilds/${guild}/members/${user}/roles/${role}`,
-    {
-      headers: { Authorization: "Bot " + token },
-      method: "PUT",
-    }
-  );
-  return resp.ok;
+) {
+  modifyUserRole(token, guild, user, role, UserModification.Add);
 }
 
 async function delRole(
@@ -210,13 +193,30 @@ async function delRole(
   guild: Snowflake,
   user: Snowflake,
   role: Snowflake
-): Promise<boolean> {
+) {
+  modifyUserRole(token, guild, user, role, UserModification.Delete);
+}
+
+async function modifyUserRole(
+  token: string,
+  guild: Snowflake,
+  user: Snowflake,
+  role: Snowflake,
+  method: UserModification
+) {
   const resp = await fetch(
     `https://discord.com/api/v10/guilds/${guild}/members/${user}/roles/${role}`,
     {
       headers: { Authorization: "Bot " + token },
-      method: "DELETE",
+      method: method,
     }
   );
-  return resp.ok;
+  if (!resp.ok) {
+    throw new Error(await resp.text());
+  }
+}
+
+enum UserModification {
+  Add = "PUT",
+  Delete = "DELETE",
 }
