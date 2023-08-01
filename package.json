@@ -12,7 +12,7 @@
     "deploy": "wrangler publish"
   },
   "dependencies": {
-    "discord-api-types": "^0.37.43",
+    "discord-api-types": "^0.37.51",
     "discord-interactions": "^3.4.0"
   }
 }
